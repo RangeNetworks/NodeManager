@@ -1,0 +1,201 @@
+= NodeManager JSON Interface =
+
+The JSON interface operates over a ZeroMQ REQ<->REP socket pair.
+
+
+== General Notes ==
+ - everything is a string except for response codes and the static field
+ - response codes are based on HTTP
+   - 200 : action ok with response data
+   - 204 : action ok with no response data
+   - 404 : unknown key or action
+   - 406 : request is invalid
+   - 409 : conflicting value
+   - 500 : storing new value failed
+   - 501 : unknown action
+
+
+== Read All Configuration Values ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"config",
+	"action":"read"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code": 200,
+	"data": [
+		{
+			"defaultValue": "/var/run/OpenBTS/command",
+			"description": "Path for Unix domain datagram socket used for the OpenBTS console interface.",
+			"key": "CLI.SocketPath",
+			"static": false,
+			"type": "file path",
+			"units": "",
+			"validValues": "",
+			"value": "/var/run/OpenBTS/command",
+			"visibility": "customer warn - a warning will be presented and confirmation required before changing this sensitive setting"
+		},
+		...
+		{
+			"defaultValue": "0",
+			"description": "Location area code, 16 bits, values 0xFFxx are reserved.  For multi-BTS networks, assign a unique LAC to each BTS unit.  (That is not the normal procedure in conventional GSM networks, but is the correct procedure in OpenBTS networks.)",
+			"key": "UMTS.Identity.LAC",
+			"static": false,
+			"type": "value range",
+			"units": "",
+			"validValues": "0:65280",
+			"value": "0",
+			"visibility": "customer warn - a warning will be presented and confirmation required before changing this sensitive setting"
+		}
+	]
+}
+}}}
+
+
+== Read Configuration Value - Valid Key ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"config",
+	"action":"read",
+	"key":"GSM.Radio.Band"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code": 200,
+	"data": {
+		"defaultValue": "900",
+		"description": "The GSM operating band.  Valid values are 850 (GSM850), 900 (PGSM900), 1800 (DCS1800) and 1900 (PCS1900).  For non-multiband units, this value is dictated by the hardware and should not be changed.",
+		"key": "GSM.Radio.Band",
+		"static": true,
+		"type": "multiple choice",
+		"units": "",
+		"validValues": "850|GSM850,900|PGSM900,1800|DCS1800,1900|PCS1900",
+		"value": "850",
+		"visibility": "factory - set once at the factory, should never be changed"
+	}
+}
+}}}
+
+
+== Read Configuration Value - Invalid Key ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"config",
+	"action":"read",
+	"key":"THISKEYISINVALID"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code":404
+}
+}}}
+
+
+== Update Configuration Value - Valid Key and Valid Value ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"config",
+	"action":"update",
+	"key":"GSM.Radio.C0",
+	"value":"151"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code":204
+}
+}}}
+
+
+== Update Configuration Value - Invalid Key and Valid Value ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"config",
+	"action":"update",
+	"key":"THISKEYISINVALID",
+	"value":"151"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code":404
+}
+}}}
+
+
+== Update Configuration Value - Valid Key and Invalid Value ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"config",
+	"action":"update",
+	"key":"GSM.Radio.C0",
+	"value":"999"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code":406
+}
+}}}
+
+
+== Read Version ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"version",
+	"action":"read"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code":200,
+	"data":"release 3.0TRUNK C built Feb 28 2013 rev4981M"
+}
+}}}
+
+
+== Start a Timed PCAP Trace ==
+=== Request ===
+{{{
+{
+	"target":"openbts",
+	"command":"trace",
+	"action":"start",
+	"filename":"/tmp/mytrace.pcap",
+	"interface":"any",
+	"filter":"udp port 5060",
+	"seconds":"10"
+}
+}}}
+=== Response ===
+{{{
+{
+	"code":204
+}
+}}}
+
