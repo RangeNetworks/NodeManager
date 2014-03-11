@@ -30,15 +30,16 @@ The JSON interface operates over a ZeroMQ REQ<->REP socket pair.
 	"code": 200,
 	"data": [
 		{
-			"defaultValue": "/var/run/OpenBTS/command",
-			"description": "Path for Unix domain datagram socket used for the OpenBTS console interface.",
-			"key": "CLI.SocketPath",
+			"defaultValue": "127.0.0.1",
+			"description": "Interface for use in communicating between CLI and OpenBTS, use \"any\" for all interfaces, otherwise, a comma separated list of interfaces",
+			"key": "CLI.Interface",
+			"scope": 0,
 			"static": false,
-			"type": "file path",
+			"type": "IP address",
 			"units": "",
 			"validValues": "",
-			"value": "/var/run/OpenBTS/command",
-			"visibility": "customer warn - a warning will be presented and confirmation required before changing this sensitive setting"
+			"value": "127.0.0.1",
+			"visibility": "factory - set once at the factory, should never be changed"
 		},
 		...
 		{
