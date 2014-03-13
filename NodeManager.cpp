@@ -31,8 +31,13 @@ void* commandsLoop(void*)
 {
 	// TODO : i hate this, need to figure out a way to satisfy the compiler and pass
 	// NodeManager::worker directly to mServer.start();
+	// (pat) You can probably make it a static method and call it via NodeManager::myStaticMethodName.
+
 	extern NodeManager gNodeManager;
-	gNodeManager.commandsWorker(NULL);
+	try {
+		// This errors out when OpenBTS exits.
+		gNodeManager.commandsWorker(NULL);
+	} catch (...) {}
 	return NULL;
 }
 
