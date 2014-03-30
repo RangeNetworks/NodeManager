@@ -1,5 +1,5 @@
 /*
-* Copyright 2013 Range Networks, Inc.
+* Copyright 2013, 2014 Range Networks, Inc.
 *
 * This software is distributed under the terms of the GNU Affero Public License.
 * See the COPYING file in the main directory for details.
@@ -195,18 +195,18 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		dbPath = "/var/lib/asterisk/sqlite3dir/sqlite3.db";
 	// TODO : should query OpenBTS directly because this table may dissappear
 	} else if (table.compare("neighbor_table") == 0) {
-		dbPath = "/var/run/OpenBTS/NeighborTable.db";
+		dbPath = "/var/run/NeighborTable.db";
 	// TODO : should query OpenBTS directly because this table may dissappear
 	} else if (table.compare("phystatus") == 0) {
-		dbPath = "/var/run/OpenBTS/ChannelTable.db";
+		dbPath = "/var/run/ChannelTable.db";
 	// TODO : should query OpenBTS directly because this table may dissappear
 	} else if (table.compare("tmsi_table") == 0) {
-		dbPath = "/var/run/OpenBTS/TMSITable.db";
+		dbPath = "/var/run/TMSITable.db";
 	// TODO : should query OpenBTS directly because this table may dissappear
 	} else if (table.compare("transaction_table") == 0) {
-		dbPath = "/var/run/OpenBTS/TransactionTable.db";
+		dbPath = "/var/run/TransactionTable.db";
 	} else if (table.compare("spectrum_map") == 0) {
-		dbPath = "/var/run/OpenBTS/PowerScannerResults.db";
+		dbPath = "/var/run/PowerScannerResults.db";
 	} else {
 		response["code"] = JsonBox::Value(406);
 		response["data"] = JsonBox::Value("invalid table");
