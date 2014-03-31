@@ -29,6 +29,7 @@
 
 
 #include <Globals.h>
+#include <Logger.h>
 #include <algorithm>
 #include <zmq.hpp>
 #include <JsonBox.h>
