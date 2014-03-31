@@ -167,20 +167,20 @@ The JSON interface operates over a ZeroMQ REQ<->REP socket pair.
 {{{
 {
 	"target":"openbts",
-	"command":"version",
-	"action":"read"
+	"command":"version"
 }
 }}}
 === Response ===
 {{{
 {
 	"code":200,
-	"data":"release 3.0TRUNK C built Feb 28 2013 rev4981M"
+	"data":"release 4.0.0.8025+GPRS C built Mar 19 2014 rev8026 CommonLibs:rev8010 "
 }
 }}}
 
 
 == Start a Timed PCAP Trace ==
+Note: this command is in development as of R4.0
 === Request ===
 {{{
 {
