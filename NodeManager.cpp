@@ -27,17 +27,20 @@
 #include <stdio.h>
 
 // TODO : not a member of NodeManager, fails to compile...
-void* commandsLoop(void*)
+void* NodeManager::commandsLoop(void*)
 {
 	// TODO : i hate this, need to figure out a way to satisfy the compiler and pass
 	// NodeManager::worker directly to mServer.start();
-	// (pat) You can probably make it a static method and call it via NodeManager::myStaticMethodName.
+	// (pat) You make it a static method and call it via NodeManager::commandLoop.
+	// In general, 'this' would be passed as the void* arg, which allows multiple instances, instead of using gNodeManager.
 
 	extern NodeManager gNodeManager;
 	try {
 		// This errors out when OpenBTS exits.
 		gNodeManager.commandsWorker(NULL);
-	} catch (...) {}
+	} catch (...) {
+		LOG(INFO) << "Exception occurred in NodeManager";	// (pat 3-2014) added.  Evidently this happens regularly, so make it an INFO message.
+	}
 	return NULL;
 }
 
@@ -76,7 +79,8 @@ void* NodeManager::commandsWorker(void *)
 }
 
 // TODO : not a member of NodeManager, fails to compile...
-void* eventsLoop(void*)
+// A very fine but unused function.
+static void* eventsLoop(void*)
 {
 	// TODO : i hate this, need to figure out a way to satisfy the compiler and pass
 	// NodeManager::worker directly to mServer.start();
@@ -112,9 +116,15 @@ void NodeManager::start(int commandsPort)//, int eventsPort)
 	char address[24];
 
 	signal(SIGPIPE, SIG_IGN);
-	sprintf(address, "tcp://127.0.0.1:%d", commandsPort);
-	mCommandsSocket.bind(address);
-	mCommandsServer.start(commandsLoop, NULL);
+	snprintf(address, sizeof(address), "tcp://127.0.0.1:%d", commandsPort);
+	// (pat 3-2014) The zmq library throws a standard exception if it cannot bind, with no useful description in the exception whatsoever.
+	try {
+		mCommandsSocket.bind(address);
+	} catch (...) {
+		LOG(EMERG) << "Could not bind address: " << address << " (possibly in use?)  Exiting...";
+		exit(0);	// Thats it.
+	}
+	mCommandsServer.start(NodeManager::commandsLoop, NULL);
 
 	// TODO : post WebUI NG MVP
 	//// create the listening socket

@@ -76,6 +76,7 @@ class NodeManager {
 	// TODO : post WebUI NG MVP
 	void start(int commandsPort);//, int eventsPort);
 	void* commandsWorker(void*);
+	static void* commandsLoop(void*);
 	void* eventsWorker(void*);
 	// TODO : post WebUI NG MVP
 	//void publishEvent(const std::string& message);
