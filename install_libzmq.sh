@@ -28,7 +28,7 @@ sudo apt-get update
 echo
 
 echo "# installing modern zeromq packages"
-sudo apt-get install libzmq3-dev libzmq3 python-zmq
+sudo apt-get install -y libzmq3-dev libzmq3 python-zmq
 echo
 
 echo "# done"
