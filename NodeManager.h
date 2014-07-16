@@ -31,11 +31,13 @@
 #include <Globals.h>
 #include <Logger.h>
 #include <algorithm>
-#include <zmq.hpp>
 #include <JsonBox.h>
 #include <sys/signal.h>
+#include <sys/time.h>	// For gettimeofday
 #include <string>
 #include <map>
+#include <Threads.h>
+#include <zmq.hpp>
 
 class NodeManager {
 
@@ -43,17 +45,12 @@ class NodeManager {
 
 	zmq::context_t mContext;
 	zmq::socket_t mCommandsSocket;
+	zmq::socket_t mEventsSocket;
 	Thread mCommandsServer;
-	Thread mEventsServer;
+	mutable Mutex mLock;
 	JsonBox::Object (*mAppLogicHandler)(JsonBox::Object&);
  	bool (*mAppConfigChangeHandler)(std::string&, std::string&, std::string&);
 	std::map<std::string, std::string> mDirtyConfigurationKeys;
-
-	int maxConnectedSockets;
-	int connectedSockets[5];
-	int connectedSocketIndex;
-	int listeningSocket;
-	struct sockaddr_in eventssrvaddr;
 
 	std::string readRequest();
 	void writeResponse(const std::string& message);
@@ -64,28 +61,18 @@ class NodeManager {
 	NodeManager()
 		:mContext(4),
 		mCommandsSocket(mContext, ZMQ_REP),
+		mEventsSocket(mContext, ZMQ_PUB),
 		mAppLogicHandler(NULL),
-		mAppConfigChangeHandler(NULL),
-		maxConnectedSockets(5),
-		connectedSocketIndex(-1)
-	{
-		for (int i = 0; i < maxConnectedSockets; i++) {
-			connectedSockets[i] = -1;
-		}
-	}
+		mAppConfigChangeHandler(NULL)
+	{ }
 
-	// TODO : post WebUI NG MVP
-	void start(int commandsPort);//, int eventsPort);
+	void start(int commandsPort, int eventsPort=0);
 	void* commandsWorker(void*);
 	static void* commandsLoop(void*);
-	void* eventsWorker(void*);
-	// TODO : post WebUI NG MVP
-	//void publishEvent(const std::string& message);
+	void publishEvent(const std::string& name, const std::string& version, const JsonBox::Object& data);
 
 	JsonBox::Object version(JsonBox::Object command);
 	JsonBox::Object config(JsonBox::Object command);
-	// TODO : post WebUI NG MVP
-	//JsonBox::Object trace(JsonBox::Object command);
 	void setAppLogicHandler(JsonBox::Object (*wAppLogicHandler)(JsonBox::Object&));
 	void setAppConfigChangeHandler(bool (*wAppConfigChangeHandler)(std::string&, std::string&, std::string&));
 	int addDirtyConfigurationKey(std::string&, std::string&, std::string&);
