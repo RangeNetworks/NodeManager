@@ -38,7 +38,10 @@ def usage(ret=0):
 	print "  ./nmcli.py target config update Log.Level INFO                 (update a specific configuration value)"
 	print "  ./nmcli.py openbts monitor                                     (query some live radio data)"
 	print "  ./nmcli.py sipauthserve subscribers read                       (show all subscribers)"
-	print "  ./nmcli.py sipauthserve subscribers create name imsi msisdn ki (create a subscriber)"
+	print "  ./nmcli.py sipauthserve subscribers create name imsi msisdn    (create a subscriber which uses cache auth)"
+	print "  ./nmcli.py sipauthserve subscribers create name imsi msisdn ki (create a subscriber which uses full auth)"
+	print "  ./nmcli.py sipauthserve subscribers delete imsi the-imsi       (delete a subscriber by imsi)"
+	print "  ./nmcli.py sipauthserve subscribers delete msisdn the-msisdn   (delete a subscriber by imsi)"
 	print "response codes:"
 	print "  200 : action ok with response data"
 	print "  204 : action ok with no response data"
@@ -65,14 +68,23 @@ if len(sys.argv) > 4:
 if len(sys.argv) > 5:
 	value = sys.argv[5]
 
-# some ugly one-off processing for creating subscribers, too useful to leave out
+# some ugly one-off processing for manipulating subscribers, too useful to leave out
 if target == "sipauthserve" and command == "subscribers" and action == "create":
-	if len(sys.argv) != 8:
+	if len(sys.argv) != 7 and len(sys.argv) != 8:
 		usage(1)
 	name = key
 	imsi = value
-	msisdn = sys.argv[6]	
-	ki = sys.argv[7]
+	msisdn = sys.argv[6]
+	if len(sys.argv) == 8:
+		ki = sys.argv[7]
+	else:
+		ki = ""
+
+if target == "sipauthserve" and command == "subscribers" and action == "delete":
+	if len(sys.argv) != 6:
+		usage(1)
+	fieldName = key
+	fieldValue = value
 
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
@@ -81,6 +93,8 @@ socket.connect(addresses[target])
 request = '{"command":"' + command + '","action":"' + action + '","key":"' + key + '","value":"' + value + '"}'
 if target == "sipauthserve" and command == "subscribers" and action == "create":
 	request = '{"command":"subscribers","action":"create","fields":{"name":"' + name + '","imsi":"' + imsi + '","msisdn":"' + msisdn + '","ki":"' + ki + '"}}'
+if target == "sipauthserve" and command == "subscribers" and action == "delete":
+	request = '{"command":"subscribers","action":"delete","match":{"' + fieldName + '":"' + fieldValue + '"}}'
 print "raw request: " + request
 socket.send(request)
 
