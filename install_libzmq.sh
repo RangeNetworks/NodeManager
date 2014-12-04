@@ -16,11 +16,11 @@ fi
 echo
 
 echo "# adding additional repo tools"
-sudo apt-get install software-properties-common python-software-properties
+sudo apt-get install -y software-properties-common python-software-properties
 echo
 
 echo "# adding modern zeromq repository"
-sudo add-apt-repository ppa:chris-lea/zeromq
+sudo add-apt-repository -y ppa:chris-lea/zeromq
 echo
 
 echo "# updating repositories"
@@ -28,7 +28,7 @@ sudo apt-get update
 echo
 
 echo "# installing modern zeromq packages"
-sudo apt-get install libzmq3-dev libzmq3 python-zmq
+sudo apt-get install -y libzmq3-dev libzmq3 python-zmq
 echo
 
 echo "# done"
