@@ -20,11 +20,12 @@
 
 include $(top_srcdir)/Makefile.common
 
-AM_CPPFLAGS = $(STD_DEFINES_AND_INCLUDES)
-AM_CXXFLAGS = -Wall -O3
+# AM_CPPFLAGS = $(STD_DEFINES_AND_INCLUDES)
+# AM_CXXFLAGS = -Wall -O3
 
 noinst_LTLIBRARIES = libnodemanager.la
 
+libnodemanager_la_CXXFLAGS = $(AM_CXXFLAGS) -O3
 libnodemanager_la_SOURCES = \
 	NodeManager.cpp \
 	JsonBox-0.4.3/src/Array.cpp \

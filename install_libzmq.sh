@@ -15,26 +15,20 @@ else
 fi
 echo
 
-echo "# checking for root user"
-if [ "$EUID" -ne 0 ];
-	then echo "Please run the command as 'sudo $0 $@'"
-	exit
-fi
-
 echo "# adding additional repo tools"
-apt-get install -y software-properties-common python-software-properties || echo "# Installation of software-properties-common and pyton-software-properties installation failed!"
+sudo apt-get install software-properties-common python-software-properties
 echo
 
 echo "# adding modern zeromq repository"
-add-apt-repository -y ppa:chris-lea/zeromq || echo "# Adding modern zeromq repository failed. First fix adding the command 'sudo add-apt-repository -y ppa:chris-lea/zeromq '"
+sudo add-apt-repository ppa:chris-lea/zeromq
 echo
 
 echo "# updating repositories"
-apt-get update || echo "# apt-get update failed!"
+sudo apt-get update
 echo
 
 echo "# installing modern zeromq packages"
-apt-get install -y libzmq3-dev libzmq3 python-zmq || echo "# Installation of libzmq3-dev libzmq3 python-zmq failed!"
+sudo apt-get install libzmq3-dev libzmq3 python-zmq
 echo
 
 echo "# done"
