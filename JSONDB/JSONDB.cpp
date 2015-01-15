@@ -277,6 +277,22 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			}
 			std::string msisdn = jit->second.getString();
 
+			jit = fields.find("ipaddr");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing ipaddr");
+				return response;
+			}
+			std::string ipaddr = jit->second.getString();
+
+			jit = fields.find("port");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing port");
+				return response;
+			}
+			std::string port = jit->second.getString();
+
 			jit = fields.find("ki");
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
@@ -289,8 +305,8 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			JsonBox::Object responseSIP;
 			JsonBox::Object responseDIAL;
 
-			queryTMP << "insert into sip_buddies (username, name, callerid, ki, host, allow, ipaddr)";
-			queryTMP << " values (\"" << imsi << "\",\"" << name << "\",\"" << msisdn << "\",\"" << ki << "\",\"dynamic\",\"gsm\",\"127.0.0.1\")";
+			queryTMP << "insert into sip_buddies (username, name, callerid, ki, host, allow, ipaddr, port)";
+			queryTMP << " values (\"" << imsi << "\",\"" << name << "\",\"" << msisdn << "\",\"" << ki << "\",\"dynamic\",\"gsm\",\"" << ipaddr << "\",\"" << port << "\" )";
 			responseSIP = execOnly(queryTMP.str());
 
 			queryTMP.str("");
@@ -343,11 +359,26 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			}
 			std::string msisdn = jit->second.getString();
 
+			jit = fields.find("ipaddr");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing ipaddr");
+				return response;
+			}
+			std::string ipaddr = jit->second.getString();
+
+			jit = fields.find("port");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing port");
+				return response;
+			}
+			std::string port = jit->second.getString();
 			std::stringstream queryTMP;
 			JsonBox::Object responseSIP;
 			JsonBox::Object responseDIAL;
 
-			queryTMP << "update sip_buddies set name=\"" << name << "\", callerid=\"" << msisdn << "\" where username=\"" << imsi << "\"";
+			queryTMP << "update sip_buddies set name=\"" << name << "\", callerid=\"" << msisdn << "\", ipaddr=\"" << ipaddr << "\", port=\"" << port << "\" where username=\"" << imsi << "\"";
 			responseSIP = execOnly(queryTMP.str());
 
 			queryTMP.str("");
