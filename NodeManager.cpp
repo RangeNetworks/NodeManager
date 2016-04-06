@@ -125,7 +125,7 @@ void NodeManager::publishEvent(const std::string& name, const std::string& versi
 	std::string timestamp;
 
 	gettimeofday(&tv, NULL);
-	unsigned long long tmp = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+	unsigned long long tmp = tv.tv_sec * 1000LL + tv.tv_usec / 1000;
 	ss << tmp;
 	timestamp = ss.str();
 	ss.str("");
