@@ -72,6 +72,25 @@ std::string JSONDB::generateWhereClause(JsonBox::Object request)
 	return ss.str();
 }
 
+std::string JSONDB::generateSelectFields(JsonBox::Object request)
+{
+	std::stringstream ss;
+	std::vector<std::string> fields_str;
+
+	JsonBox::Array fields = request["fields"].getArray();
+
+	if (fields.size() > 0) {
+		JsonBox::Array::iterator jit;
+		for (jit = fields.begin(); jit != fields.end(); jit++) {
+			fields_str.push_back(jit->getString());
+		}
+		ss << implode(", ", fields_str);
+        } else {
+		ss << "*";
+        }
+	return ss.str();
+}
+
 std::string JSONDB::implode(std::string delimiter, std::vector<std::string> pieces)
 {
 	std::stringstream ss;
@@ -258,6 +277,22 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			}
 			std::string msisdn = jit->second.getString();
 
+			jit = fields.find("ipaddr");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing ipaddr");
+				return response;
+			}
+			std::string ipaddr = jit->second.getString();
+
+			jit = fields.find("port");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing port");
+				return response;
+			}
+			std::string port = jit->second.getString();
+
 			jit = fields.find("ki");
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
@@ -270,8 +305,8 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			JsonBox::Object responseSIP;
 			JsonBox::Object responseDIAL;
 
-			queryTMP << "insert into sip_buddies (username, name, callerid, ki, host, allow, ipaddr)";
-			queryTMP << " values (\"" << imsi << "\",\"" << name << "\",\"" << msisdn << "\",\"" << ki << "\",\"dynamic\",\"gsm\",\"127.0.0.1\")";
+			queryTMP << "insert into sip_buddies (username, name, callerid, ki, host, allow, ipaddr, port)";
+			queryTMP << " values (\"" << imsi << "\",\"" << name << "\",\"" << msisdn << "\",\"" << ki << "\",\"dynamic\",\"gsm\",\"" << ipaddr << "\",\"" << port << "\" )";
 			responseSIP = execOnly(queryTMP.str());
 
 			queryTMP.str("");
@@ -289,6 +324,10 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 
 		} else if (action.compare("read") == 0) {
 			q << "select sip_buddies.username as \"imsi\", sip_buddies.name as \"name\", dialdata_table.exten as \"msisdn\" from sip_buddies left outer join dialdata_table on sip_buddies.username = dialdata_table.dial";
+
+                        // add match clause
+                        q << generateWhereClause(request);
+
 			return read(q.str());
 
 		} else if (action.compare("update") == 0) {
@@ -320,11 +359,26 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			}
 			std::string msisdn = jit->second.getString();
 
+			jit = fields.find("ipaddr");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing ipaddr");
+				return response;
+			}
+			std::string ipaddr = jit->second.getString();
+
+			jit = fields.find("port");
+			if (jit == fields.end()) {
+				response["code"] = JsonBox::Value(406);
+				response["data"] = JsonBox::Value("missing port");
+				return response;
+			}
+			std::string port = jit->second.getString();
 			std::stringstream queryTMP;
 			JsonBox::Object responseSIP;
 			JsonBox::Object responseDIAL;
 
-			queryTMP << "update sip_buddies set name=\"" << name << "\", callerid=\"" << msisdn << "\" where username=\"" << imsi << "\"";
+			queryTMP << "update sip_buddies set name=\"" << name << "\", callerid=\"" << msisdn << "\", ipaddr=\"" << ipaddr << "\", port=\"" << port << "\" where username=\"" << imsi << "\"";
 			responseSIP = execOnly(queryTMP.str());
 
 			queryTMP.str("");
@@ -403,11 +457,15 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 	// READ
 	} else if (action.compare("read") == 0) {
 		// start query
-		q << "select * from " << table;
+		q << "select ";
+
+		// add select fields
+		q << generateSelectFields(request);
+
+		q << " from " << table;
 
 		// add match clause
 		q << generateWhereClause(request);
-
 		return read(q.str());
 
 	// UPDATE

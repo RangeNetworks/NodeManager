@@ -37,6 +37,7 @@ class JSONDB {
 
 	sqlite3* mDB;
 	std::string generateWhereClause(JsonBox::Object request);
+	std::string generateSelectFields(JsonBox::Object request);
 	std::string implode(std::string delimiter, std::vector<std::string> pieces);
 	JsonBox::Object read(std::string query, unsigned retries = 5);
 	JsonBox::Object execOnly(std::string query, unsigned retries = 5);
